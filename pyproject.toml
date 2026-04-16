@@ -19,5 +19,12 @@ dependencies = [
 [project.scripts]
 train-pipeline = "scripts.train_pipeline:main"
 
+[project.optional-dependencies]
+dev = [
+    "jupyter",
+    "ipykernel",
+    "matplotlib",
+]
+
 [tool.setuptools]
 packages = ["src", "scripts"]

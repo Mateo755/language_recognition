@@ -70,6 +70,15 @@ python scripts/train_pipeline.py
 
 Wytrenowany model zapisuje się domyślnie do **`models/trained_pipeline-0.1.0.pkl`** (folder `models/` utworzy się przy zapisie, jeśli go nie ma).
 
+### Notatnik EDA (analiza danych)
+
+Zainstaluj opcjonalne pakiety dev (Jupyter, matplotlib), potem otwórz notatnik:
+
+```bash
+pip install -e ".[dev]"
+jupyter notebook notebooks/eda.ipynb
+```
+
 ---
 
 ## Struktura repozytorium
@@ -86,6 +95,8 @@ language_recognition/
 ├── scripts/
 │   ├── __init__.py
 │   └── train_pipeline.py   # pipeline treningowy
+├── notebooks/
+│   └── eda.ipynb           # krótka analiza eksploracyjna danych
 ├── src/
 │   ├── __init__.py
 │   ├── data_preprocessing.py
