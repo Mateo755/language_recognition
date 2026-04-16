@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "language-recognition"
+version = "0.1.0"
+description = "Language detection training and API"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "scikit-learn",
+    "pandas",
+    "pydantic",
+]
+
+[project.scripts]
+train-pipeline = "scripts.train_pipeline:main"
+
+[tool.setuptools]
+packages = ["src", "scripts"]

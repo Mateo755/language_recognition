@@ -1,0 +1,2 @@
+# Dependencies are defined in pyproject.toml. This installs the project in editable mode.
+-e .

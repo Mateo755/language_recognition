@@ -1,18 +1,17 @@
 """
 End-to-end training pipeline: load data, split, train, evaluate, and save the model.
+
+Requires an editable install from the project root: ``pip install -e .``
 """
 
-import sys
 from pathlib import Path
 from typing import Optional
 
-_ROOT = Path(__file__).resolve().parent.parent
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
+from src.data_preprocessing import load_and_clean_data
+from src.data_split import split_dataset
+from src.model_training import build_and_train_model, evaluate_model, save_model
 
-from src.data_preprocessing import load_and_clean_data  # noqa: E402
-from src.data_split import split_dataset  # noqa: E402
-from src.model_training import build_and_train_model, evaluate_model, save_model  # noqa: E402
+_ROOT = Path(__file__).resolve().parent.parent
 
 # Default paths relative to the project root
 _DEFAULT_DATA = _ROOT / "data" / "language_detection.csv"
@@ -66,6 +65,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # From project root: python scripts/train_pipeline.py
-    # Or: python -m scripts.train_pipeline
+    # After ``pip install -e .``: ``python scripts/train_pipeline.py`` or ``python -m scripts.train_pipeline``
+    # Or run the console script: ``train-pipeline``
     main()
