@@ -10,7 +10,7 @@ from typing import Any, Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from src.data_preprocessing import clean_text
+from src.text_cleaning import clean_text
 
 logger = logging.getLogger(__name__)
 

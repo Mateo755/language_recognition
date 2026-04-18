@@ -1,19 +1,8 @@
 """Text loading and cleaning utilities for the language detection pipeline."""
 
-import re
-
 import pandas as pd
 
-
-def clean_text(text: str) -> str:
-    """
-    Normalize a single text string for downstream vectorization.
-
-    Strips noisy punctuation and digits, then lowercases the result.
-    """
-    text = re.sub(r'[!@#$(),\n"%^*?\:;~`0-9]', " ", text)
-    text = re.sub(r"[[]]", " ", text)
-    return text.lower()
+from src.text_cleaning import clean_text
 
 
 def load_and_clean_data(filepath: str) -> pd.DataFrame:

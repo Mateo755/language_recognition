@@ -1,0 +1,5 @@
+# Inference-only dependencies for the API Docker image (no training stack).
+fastapi
+uvicorn
+pydantic
+scikit-learn

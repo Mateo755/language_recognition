@@ -1,0 +1,21 @@
+# VCS and local env
+.git
+.gitignore
+.venv
+**/__pycache__
+*.py[cod]
+*.egg-info
+.pytest_cache
+.ruff_cache
+
+# Not needed to run the API
+notebooks/
+data/
+models/
+
+# Editor / OS
+.idea
+.vscode
+.cursor
+*.swp
+.DS_Store
