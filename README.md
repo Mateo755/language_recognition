@@ -70,6 +70,18 @@ python scripts/train_pipeline.py
 
 Wytrenowany model zapisuje się domyślnie do **`models/trained_pipeline-0.1.0.pkl`** (folder `models/` utworzy się przy zapisie, jeśli go nie ma).
 
+### Obraz Dockera (tylko API / inferencja)
+
+Obraz buduje się z **`Dockerfile`** i **`requirements-api.txt`** — bez kodu treningowego (`scripts/`, pandas itd.). Wspólna logika czyszczenia tekstu to **`src/text_cleaning.py`** (importowana także z treningu przez `data_preprocessing`).
+
+Przed `docker build` skopiuj artefakt do **`app/model/trained_pipeline-0.1.0.pkl`** (np. z `models/` po treningu):
+
+```bash
+cp models/trained_pipeline-0.1.0.pkl app/model/
+docker build -t language-detector-api .
+docker run --rm -p 8000:8000 language-detector-api
+```
+
 ### Notatnik EDA (analiza danych)
 
 Zainstaluj opcjonalne pakiety dev (Jupyter, matplotlib), potem otwórz notatnik:
@@ -87,7 +99,7 @@ Katalog główny projektu (np. `language_recognition/`):
 
 ```text
 language_recognition/
-├── app/                    # serwer i logika API (FastAPI)
+├── app/                    # serwer API (FastAPI); model inferencyjny: app/model/trained_pipeline-0.1.0.pkl
 ├── data/
 │   └── language_detection.csv
 ├── models/
@@ -101,7 +113,10 @@ language_recognition/
 │   ├── __init__.py
 │   ├── data_preprocessing.py
 │   ├── data_split.py
-│   └── model_training.py
+│   ├── model_training.py
+│   └── text_cleaning.py    # preprocessingu tekstu (wspólny: trening + API)
+├── Dockerfile              # obraz produkcyjny API (inferencja)
+├── requirements-api.txt    # zależności tylko pod obraz Dockera
 ├── pyproject.toml          # pakiet, zależności, entry point `train-pipeline`
 ├── requirements.txt        # `-e .` → instalacja z pyproject.toml
 ├── README.md
