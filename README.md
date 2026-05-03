@@ -14,6 +14,7 @@ A **trial deployment on Render** was done to practice shipping the same Dockeriz
 - [Getting started (local development)](#getting-started-local-development)
 - [Training](#training)
 - [Running the API locally](#running-the-api-locally)
+- [Streamlit (web UI)](#streamlit-web-ui)
 - [Docker (inference image)](#docker-inference-image)
 - [Exploratory analysis (EDA)](#exploratory-analysis-eda)
 - [Deployment (Render)](#deployment-render)
@@ -41,6 +42,7 @@ A **trial deployment on Render** was done to practice shipping the same Dockeriz
 | ML              | **scikit-learn** pipeline (serialized with pickle)                     |
 | Data / training | **pandas** (training path)                                             |
 | API             | **FastAPI**, **Pydantic**, **Uvicorn**                                 |
+| Optional UI     | **Streamlit** + **httpx** (optional `pip install -e ".[ui]"`)        |
 | Packaging       | **pip** / `pyproject.toml`; Docker for production inference            |
 | Cloud (optional) | **Render** — one-off trial deploy of the Docker image (see below)   |
 
@@ -125,6 +127,35 @@ Optional: set **`LANGUAGE_DETECTION_MODEL_PATH`** to an absolute path of a `.pkl
 
 ---
 
+## Streamlit (web UI)
+
+Optional browser UI that calls **only** the FastAPI HTTP API (`/health`, `/detect`); it does **not** load the pickled model.
+
+From the repository root with the virtual environment activated:
+
+```bash
+pip install -e ".[ui]"
+streamlit run streamlit_app.py
+```
+
+### Environment variables (Streamlit)
+
+| Variable | Purpose |
+| -------- | ------- |
+| **`LANGUAGE_DETECTOR_API_URL`** | Default **remote** base URL when the app opens; you can change it for the session via the sidebar **“Set / change API URL”** popover. Trailing slashes are trimmed. |
+| **`LANGUAGE_DETECTOR_LOCAL_API_URL`** | Overrides the **local** base URL when you choose **“Local (localhost)”** in the app (default: `http://127.0.0.1:8000`). |
+
+### Choosing a backend in the app
+
+In the sidebar:
+
+- **Remote** — set the remote base URL in the sidebar **popover** **“Set / change API URL”**; open **“Info endpoint”** for protocol, host, full base URL, and a link to **`/docs`**. The first value comes from `LANGUAGE_DETECTOR_API_URL`. Public trial URLs may stop working; see [Deployment (Render)](#deployment-render).
+- **Local (localhost)** — requests go to your machine. **“Info endpoint”** shows the local base URL and a **`/docs`** shortcut. Start the API as in [Running the API locally](#running-the-api-locally) and ensure **`app/model/trained_pipeline-0.1.0.pkl`** is present.
+
+If the remote service is down or times out, switch to **Local (localhost)** and run FastAPI locally.
+
+---
+
 ## Docker (inference image)
 
 The production image contains **only inference**: FastAPI, shared `text_cleaning`, and the bundled `.pkl` — not the training stack (`scripts/`, pandas, notebooks).
@@ -197,7 +228,8 @@ language_recognition/
 ├── Dockerfile                   # inference-only production image
 ├── requirements-api.txt         # minimal deps for Docker image
 ├── docker_docs.md               # Docker Hub overview source (inference image); copy-paste for Hub
-├── pyproject.toml               # package metadata; train-pipeline console script
+├── pyproject.toml               # package metadata; train-pipeline console script; optional [ui] extra
+├── streamlit_app.py             # optional Streamlit client for the FastAPI /detect API
 ├── requirements.txt             # pip install -e .
 └── README.md
 ```
