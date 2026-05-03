@@ -25,6 +25,10 @@ dev = [
     "ipykernel",
     "matplotlib",
 ]
+ui = [
+    "streamlit>=1.28",
+    "httpx>=0.27",
+]
 
 [tool.setuptools]
 packages = ["src", "scripts"]
