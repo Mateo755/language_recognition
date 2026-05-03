@@ -100,6 +100,24 @@ def _request_detect(base_url: str, text: str) -> tuple[bool, Optional[dict[str, 
     return False, None, _format_http_error_detail(response)
 
 
+@st.dialog("Adres zdalnego API")
+def _remote_api_url_dialog() -> None:
+    """Modal to configure the remote base URL for this Streamlit session only."""
+    st.caption(
+        "Wartość startowa pochodzi ze zmiennej LANGUAGE_DETECTOR_API_URL. "
+        "Zapis zmienia tylko bieżącą sesję aplikacji."
+    )
+    with st.form("remote_api_url_dialog_form"):
+        new_url = st.text_input(
+            "Adres bazowy (HTTPS/HTTP)",
+            value=st.session_state.remote_api_base,
+        )
+        submitted = st.form_submit_button("Zapisz", type="primary")
+    if submitted:
+        st.session_state.remote_api_base = new_url.strip()
+        st.rerun()
+
+
 def main() -> None:
     """Render the Streamlit app."""
     st.set_page_config(page_title="Wykrywanie języka", layout="centered")
@@ -118,15 +136,10 @@ def main() -> None:
         )
         is_remote = backend_mode == BACKEND_MODE_REMOTE
 
-        remote_url_input = ""
-        if is_remote:
-            remote_url_input = st.text_input(
-                "Adres bazowy API (HTTPS/HTTP)",
-                key="remote_api_base",
-                help="Inicjalizacja ze zmiennej LANGUAGE_DETECTOR_API_URL, możesz zmienić na tej sesji.",
-            )
+        if is_remote and st.button("Ustaw / zmień adres API", type="secondary"):
+            _remote_api_url_dialog()
 
-        base_url = _effective_base_url(is_remote, remote_url_input)
+        base_url = _effective_base_url(is_remote, st.session_state.remote_api_base)
         st.markdown("**Aktualny adres API**")
         st.code(base_url or "(nie ustawiono)", language=None)
 
@@ -151,8 +164,11 @@ def main() -> None:
         if not trimmed:
             st.warning("Podaj niepusty tekst.")
 
-        elif is_remote and not remote_url_input.strip():
-            st.error("W trybie zdalnym ustaw adres bazowy API (np. przez LANGUAGE_DETECTOR_API_URL).")
+        elif is_remote and not st.session_state.remote_api_base.strip():
+            st.error(
+                "W trybie zdalnym ustaw adres API: sidebar → „Ustaw / zmień adres API” "
+                "(lub zmienna LANGUAGE_DETECTOR_API_URL przy starcie)."
+            )
 
         elif trimmed:
             ok, payload, error_message = _request_detect(base_url, trimmed)
