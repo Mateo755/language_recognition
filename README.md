@@ -15,6 +15,7 @@ A **trial deployment on Render** was done to practice shipping the same Dockeriz
 - [Training](#training)
 - [Running the API locally](#running-the-api-locally)
 - [Streamlit (web UI)](#streamlit-web-ui)
+- [Trial deploy Streamlit on Render](#trial-deploy-streamlit-on-render)
 - [Docker (inference image)](#docker-inference-image)
 - [Exploratory analysis (EDA)](#exploratory-analysis-eda)
 - [Deployment (Render)](#deployment-render)
@@ -150,9 +151,36 @@ streamlit run streamlit_app.py
 In the sidebar:
 
 - **Remote** — set the remote base URL in the sidebar **popover** **“Set / change API URL”**; open **“Info endpoint”** for protocol, host, full base URL, and a link to **`/docs`**. The first value comes from `LANGUAGE_DETECTOR_API_URL`. Public trial URLs may stop working; see [Deployment (Render)](#deployment-render).
-- **Local (localhost)** — requests go to your machine. **“Info endpoint”** shows the local base URL and a **`/docs`** shortcut. Start the API as in [Running the API locally](#running-the-api-locally) and ensure **`app/model/trained_pipeline-0.1.0.pkl`** is present.
+- **Local (localhost)** — `httpx` talks to **127.0.0.1 on the machine running Streamlit**. That is useful when you run [`streamlit run streamlit_app.py`](#streamlit-web-ui) on your laptop with the API on the same host. **It does not reach your laptop when Streamlit is deployed on a remote host** (that “localhost” is inside the container).
 
-If the remote service is down or times out, switch to **Local (localhost)** and run FastAPI locally.
+If the remote API is down or slow, run the API [locally](#running-the-api-locally) or via [Docker](#docker-inference-image), and either use **Remote** in the UI with that reachable URL or run Streamlit locally with **Local**.
+
+---
+
+### Trial deploy Streamlit on Render
+
+Second **Web Service** for a **trial Streamlit UI** ([`Dockerfile.streamlit`](Dockerfile.streamlit)): small image with [`requirements-streamlit.txt`](requirements-streamlit.txt) and [`streamlit_app.py`](streamlit_app.py) only — **not** the inference stack.
+
+**Render (panel):**
+
+1. Create a **Web Service** from this repo.
+2. Set **Dockerfile path** to **`Dockerfile.streamlit`** (leave the API service on the root [`Dockerfile`](Dockerfile)).
+3. Do **not** override the start command with a fixed port: the image uses **`PORT`** from Render (see `CMD` in [`Dockerfile.streamlit`](Dockerfile.streamlit)).
+4. Set **`LANGUAGE_DETECTOR_API_URL`** to your **public HTTPS base URL** for the FastAPI service (no path; trailing `/` is OK — the app normalizes it). Requests are **server-to-server** from Streamlit to the API (**no browser CORS** requirement for this flow).
+5. Optional: set **Health check path** to **`/_stcore/health`** (Streamlit core health).
+
+**After testing:** **Suspend** or **Delete** this Web Service so it does not keep running on the free tier.
+
+**Local Docker smoke test** (from repo root):
+
+```bash
+docker build -f Dockerfile.streamlit -t language-detector-streamlit .
+docker run --rm -p 8501:8501 \
+  -e LANGUAGE_DETECTOR_API_URL=https://your-fastapi-host.example.com \
+  language-detector-streamlit
+```
+
+Then open `http://localhost:8501`. To mimic Render’s dynamic port: add `-e PORT=<port>` and map `-p <port>:<port>` accordingly.
 
 ---
 
@@ -226,7 +254,9 @@ language_recognition/
 │   ├── model_training.py
 │   └── text_cleaning.py         # shared preprocessing: training + API
 ├── Dockerfile                   # inference-only production image
+├── Dockerfile.streamlit         # Streamlit-only UI image (trial / second deploy)
 ├── requirements-api.txt         # minimal deps for Docker image
+├── requirements-streamlit.txt   # minimal deps for Dockerfile.streamlit
 ├── docker_docs.md               # Docker Hub overview source (inference image); copy-paste for Hub
 ├── pyproject.toml               # package metadata; train-pipeline console script; optional [ui] extra
 ├── streamlit_app.py             # optional Streamlit client for the FastAPI /detect API

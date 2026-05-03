@@ -1,0 +1,3 @@
+# Minimal deps for Dockerfile.streamlit (UI only; matches pyproject optional [ui])
+streamlit>=1.38
+httpx>=0.27
