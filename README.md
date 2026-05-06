@@ -1,6 +1,6 @@
 # Language detection — end-to-end ML deployment
 
-This repository is an **end-to-end MLOps-style project**: **data handling** and exploratory analysis, **model training** with scikit-learn, a **FastAPI** inference service, an inference-only **Docker** image **published to Docker Hub**, and **local** validation of the container.
+This repository is an **end-to-end MLOps-style project**: **data handling** and exploratory analysis, **model training** with scikit-learn, a **FastAPI** inference service, an inference-only **Docker** image **published to Docker Hub**, a root **`docker-compose.yml`** to run the **published** API and Streamlit UI together locally, and **local** validation of the container.
 
 A **trial deployment on Render** was done to practice shipping the same Dockerized API to a managed host. That environment is **experimental**, **not** something I plan to keep running or supporting over time, so **any public URL may stop working** without notice. Details and a single reference link are in **[Deployment (Render)](#deployment-render)** below.
 
@@ -17,6 +17,7 @@ A **trial deployment on Render** was done to practice shipping the same Dockeriz
 - [Streamlit (web UI)](#streamlit-web-ui)
 - [Trial deploy Streamlit on Render](#trial-deploy-streamlit-on-render)
 - [Docker (inference image)](#docker-inference-image)
+- [Docker Compose (full stack)](#docker-compose-full-stack)
 - [Exploratory analysis (EDA)](#exploratory-analysis-eda)
 - [Deployment (Render)](#deployment-render)
 - [Repository layout](#repository-layout)
@@ -32,6 +33,7 @@ A **trial deployment on Render** was done to practice shipping the same Dockeriz
 4. **Docker** — Slim **inference-only** image (`Dockerfile`, `requirements-api.txt`): API + frozen `.pkl` model; built and tested locally.
 5. **Registry** — Image pushed to Docker Hub (`mateo755/language-detector-api`); Hub copy is documented in [`docker_docs.md`](docker_docs.md) (see below).
 6. **Cloud (trial)** — The stack was deployed once on **Render** to verify end-to-end behavior in the cloud; see [Deployment (Render)](#deployment-render) for scope, limitations, and the (possibly temporary) public base URL.
+7. **Docker Compose** — A root [`docker-compose.yml`](docker-compose.yml) file was added to run the **published** FastAPI and Streamlit images together on one local network (Streamlit calls the API by service name). See [Docker Compose (full stack)](#docker-compose-full-stack).
 
 ---
 
@@ -199,6 +201,18 @@ Published image (example tag): `mateo755/language-detector-api:v1`
 
 **Docker Hub overview text** for visitors and `docker run` examples lives in **[`docker_docs.md`](docker_docs.md)** (inference) and **[`docker_streamlit_hub.md`](docker_streamlit_hub.md)** (Streamlit UI) — keep them in sync with this README when the contract changes.
 
+### Docker Compose (full stack)
+
+[`docker-compose.yml`](docker-compose.yml) defines two services — **api** (FastAPI) and **streamlit** (UI) — using the default Hub images (`mateo755/language-detector-api:v1`, `mateo755/language-detector-streamlit:v1`). Streamlit receives `LANGUAGE_DETECTOR_API_URL=http://api:8000` on the Compose network.
+
+From the repository root:
+
+```bash
+docker compose up -d
+```
+
+Then open **http://localhost:8501** (UI) and **http://localhost:8000/docs** (API Swagger). Host ports default to **8000** and **8501**; override with `LANGUAGE_DETECTOR_API_PORT`, `LANGUAGE_DETECTOR_STREAMLIT_PORT`, or image tags via `LANGUAGE_DETECTOR_API_IMAGE` / `LANGUAGE_DETECTOR_STREAMLIT_IMAGE` if needed (see comments at the top of `docker-compose.yml`).
+
 ---
 
 ## Exploratory analysis (EDA)
@@ -256,6 +270,7 @@ language_recognition/
 │   └── text_cleaning.py         # shared preprocessing: training + API
 ├── Dockerfile                   # inference-only production image
 ├── Dockerfile.streamlit         # Streamlit-only UI image (trial / second deploy)
+├── docker-compose.yml           # local full stack: published API + Streamlit images
 ├── requirements-api.txt         # minimal deps for Docker image
 ├── requirements-streamlit.txt   # minimal deps for Dockerfile.streamlit
 ├── docker_docs.md               # Docker Hub overview source (inference image); copy-paste for Hub
