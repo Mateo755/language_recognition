@@ -54,9 +54,10 @@ A **trial deployment on Render** was done to practice shipping the same Dockeriz
 | Document                             | Purpose                                                                                                                                                                                                                          |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **This `README.md`**                 | Full project: setup, training, local API, Docker workflow, optional cloud trial notes, repository map.                                                                                                                           |
-| **[`docker_docs.md`](docker_docs.md)** | **Canonical copy-paste** text for the [Docker Hub](https://hub.docker.com/r/mateo755/language-detector-api) repository **overview** for the **published inference image** only (includes Hub links for readers browsing GitHub). It does not duplicate training/EDA instructions. |
+| **[`docker_docs.md`](docker_docs.md)** | Markdown for the [Docker Hub](https://hub.docker.com/r/mateo755/language-detector-api) **overview** of the **inference image** (with Hub links for people opening the repo from GitHub). Training and EDA stay in this README only. |
+| **[`docker_streamlit_hub.md`](docker_streamlit_hub.md)** | Markdown for the [language-detector-streamlit](https://hub.docker.com/r/mateo755/language-detector-streamlit) Hub **overview** (Streamlit UI). Keep it in sync with **`README.md`** if env vars or `Dockerfile.streamlit` change. |
 
-When you change API behavior (routes, env vars, limits), update **`docker_docs.md`** and paste the revised Markdown into Docker Hub so the Hub page stays aligned with the image.
+After you edit endpoints, configuration, or limits documented for the API, refresh **`docker_docs.md`** and paste it into Docker Hub so the page matches the image. After Streamlit-related changes (**`Dockerfile.streamlit`**, `LANGUAGE_DETECTOR_API_URL`, and similar), do the same for **`docker_streamlit_hub.md`** on the Streamlit repository overview.
 
 ---
 
@@ -196,7 +197,7 @@ docker run --rm -p 8000:8000 language-detector-api
 
 Published image (example tag): `mateo755/language-detector-api:v1`
 
-**Docker Hub overview text** for visitors and `docker run` examples lives in **[`docker_docs.md`](docker_docs.md)** — keep it in sync with this README when the inference contract changes.
+**Docker Hub overview text** for visitors and `docker run` examples lives in **[`docker_docs.md`](docker_docs.md)** (inference) and **[`docker_streamlit_hub.md`](docker_streamlit_hub.md)** (Streamlit UI) — keep them in sync with this README when the contract changes.
 
 ---
 
@@ -258,6 +259,7 @@ language_recognition/
 ├── requirements-api.txt         # minimal deps for Docker image
 ├── requirements-streamlit.txt   # minimal deps for Dockerfile.streamlit
 ├── docker_docs.md               # Docker Hub overview source (inference image); copy-paste for Hub
+├── docker_streamlit_hub.md      # Docker Hub overview source (Streamlit UI); copy-paste for Hub
 ├── pyproject.toml               # package metadata; train-pipeline console script; optional [ui] extra
 ├── streamlit_app.py             # optional Streamlit client for the FastAPI /detect API
 ├── requirements.txt             # pip install -e .
