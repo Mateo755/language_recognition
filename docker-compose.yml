@@ -1,0 +1,38 @@
+# Full stack from published images: FastAPI (inference) + Streamlit UI.
+# The UI reaches the API over the Compose network via the service name `api`.
+#
+# Usage:
+#   docker compose up -d
+#   Open http://localhost:8501
+#   API: http://localhost:8000 — Swagger: http://localhost:8000/docs
+#
+# Override images or host ports (optional):
+#   LANGUAGE_DETECTOR_API_IMAGE=myregistry/language-detector-api:tag \
+#   LANGUAGE_DETECTOR_STREAMLIT_IMAGE=myregistry/language-detector-streamlit:tag \
+#   docker compose up -d
+
+services:
+  api:
+    image: ${LANGUAGE_DETECTOR_API_IMAGE:-mateo755/language-detector-api:v1}
+    ports:
+      - "${LANGUAGE_DETECTOR_API_PORT:-8000}:8000"
+    restart: unless-stopped
+    networks:
+      - language_detector
+
+  streamlit:
+    image: ${LANGUAGE_DETECTOR_STREAMLIT_IMAGE:-mateo755/language-detector-streamlit:v1}
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      LANGUAGE_DETECTOR_API_URL: http://api:8000
+    ports:
+      - "${LANGUAGE_DETECTOR_STREAMLIT_PORT:-8501}:8501"
+    restart: unless-stopped
+    networks:
+      - language_detector
+
+networks:
+  language_detector:
+    driver: bridge
